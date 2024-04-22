@@ -6,5 +6,6 @@ y <- 12 + 3 * x + e
 
 plot(x, y)
 
+
 fit <- lm(y ~ x)
 summary(fit)
