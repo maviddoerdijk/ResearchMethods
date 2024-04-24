@@ -13,6 +13,9 @@ simulate_false_rejections <- function(num_simulations, n, mean, sd, QRP_committe
     simulated_data <- rnorm(n = n, mean = mean, sd = sd)
     
     # Perform t-test (assuming null hypothesis is true)
+    # this code is performing a one-sample t-test.
+    # the t.test function in R performs a t-test, and the mu parameter specifies the true mean under the null hypothesis. 
+    # n a one-sample t-test, we compare the mean of a single sample of data to a known value (in this case, the mean parameter).
     t_test_result <- t.test(simulated_data, mu = mean)
     
     # Store p-value
@@ -88,7 +91,7 @@ get_results_df <- function() {
 
 
 # Set to TRUE if you want to load results from file, expected execution time is 2 minutes
-load_from_file <- FALSE
+load_from_file <- TRUE
 
 
 if (load_from_file) { 
@@ -101,8 +104,11 @@ if (load_from_file) {
 # plot mean and standard deviation for all results in results_df
 library(ggplot2) 
 
-ggplot(results_df, aes(x=QRP, y=mean)) + 
+p <- ggplot(results_df, aes(x=QRP, y=mean)) + 
 geom_bar(position = position_dodge(), stat="identity", colour="black", fill="skyblue") +
 geom_errorbar(aes(ymin=mean-SD, ymax=mean+SD), width=.2) +
 theme(axis.text.x = element_text(angle = 45, hjust = 1)) + # change angle of x-axis QRP strings
 ggtitle("Mean proportion of false rejections under different QRP's")
+
+# Save the plot as a PNG image (easier to use in latex than pdf)
+ggsave(filename = "plot.png", plot = p, width = 10, height = 10, dpi = 300)
