@@ -14,13 +14,13 @@ simulate_false_rejections <- function(num_simulations, n, mean, sd, QRP_committe
         # Implement sequential testing with optional stopping
         # Take test in steps of 2 and check when result is significant
         if(QRP_committed == 'sequential_testing_low'){
-            custom_sample_step = 20
+            custom_sample_step = n / 10
             custom_sample_size = n / 1.2
         }else if(QRP_committed == 'sequential_testing_medium'){
-            custom_sample_step = 20
+            custom_sample_step = n / 10
             custom_sample_size = n / 1.5
         }else if(QRP_committed == 'sequential_testing_high'){
-            custom_sample_step = 20
+            custom_sample_step = n / 10
             custom_sample_size = n / 2
         }
 
@@ -45,13 +45,13 @@ simulate_false_rejections <- function(num_simulations, n, mean, sd, QRP_committe
             # remove values that are more than 3 standard deviations away from the mean
             if(QRP_committed == 'remove_outliers_low'){
                 cutoff_max <- 2.5*sd
-                cutoff_min <- 2*sd
+                cutoff_min <- 2.8*sd
             } else if(QRP_committed == 'remove_outliers_medium'){
-                cutoff_max <- 2*sd
+                cutoff_max <- 2.5*sd
                 cutoff_min <- 3*sd  
             } else if(QRP_committed == 'remove_outliers_high'){
-                cutoff_max <- 2*sd
-                cutoff_min <- 3.5*sd
+                cutoff_max <- 2.5*sd
+                cutoff_min <- 3.2*sd
             }
             simulated_data <- simulated_data[simulated_data < mean + cutoff_max & simulated_data > mean - cutoff_min]
         }
@@ -112,6 +112,12 @@ simulate_average_false_rejections <- function(num_runs, num_simulations, n, mean
 
 get_results_df <- function() {
   # initialize empty df to store results
+
+  # Set true to make results reproducible
+  set_seed <- FALSE
+  if (set_seed) {
+    set.seed(123)
+  }
   results_df <- data.frame(QRP = character(), mean = numeric(), CI = numeric(), SD = numeric(), stringsAsFactors = FALSE)
 
 
@@ -122,7 +128,7 @@ get_results_df <- function() {
      "remove_outliers_low", "remove_outliers_medium", "remove_outliers_high")
 
   for (QRP in possible_QRPs) {
-    args = list(num_runs = 10,num_simulations = 30000, n = 100, mean = 65.5, sd = 7.7, QRP_committed = QRP)
+    args = list(num_runs = 10,num_simulations = 30000, n = 1000, mean = 65.5, sd = 7.7, QRP_committed = QRP)
     results = do.call(simulate_average_false_rejections, args)
     print(paste("CI: ", results$ci))
     print(paste("SD: ", results$sd))
