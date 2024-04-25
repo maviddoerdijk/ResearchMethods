@@ -10,12 +10,19 @@ simulate_false_rejections <- function(num_simulations, n, mean, sd, QRP_committe
   # Loop through simulations
   for (i in 1:num_simulations) {
 
-    if(QRP_committed == "sequential_testing"){
+    if(QRP_committed == "sequential_testing_low" || QRP_committed == "sequential_testing_medium" || QRP_committed == "sequential_testing_high"){
         # Implement sequential testing with optional stopping
-
         # Take test in steps of 2 and check when result is significant
-        custom_sample_step = 20
-        custom_sample_size = n / 2
+        if(QRP_committed == 'sequential_testing_low'){
+            custom_sample_step = 20
+            custom_sample_size = n / 1.2
+        }else if(QRP_committed == 'sequential_testing_medium'){
+            custom_sample_step = 20
+            custom_sample_size = n / 1.5
+        }else if(QRP_committed == 'sequential_testing_high'){
+            custom_sample_step = 20
+            custom_sample_size = n / 2
+        }
 
         while( custom_sample_size < n ){
             simulated_data <- rnorm(n = custom_sample_size, mean = mean, sd = sd)
@@ -33,10 +40,20 @@ simulate_false_rejections <- function(num_simulations, n, mean, sd, QRP_committe
     }
 
     if (!is.null(QRP_committed)) {
-        if (QRP_committed == "remove_outliers"){
+        if (QRP_committed == "remove_outliers_low" || QRP_committed == "remove_outliers_medium" || QRP_committed == "remove_outliers_high"){
             # Remove outliers with different criteria, depending on the results
             # remove values that are more than 3 standard deviations away from the mean
-            simulated_data <- simulated_data[simulated_data < mean + 2*sd & simulated_data > mean - 3*sd]
+            if(QRP_committed == 'remove_outliers_low'){
+                cutoff_max <- 2.5*sd
+                cutoff_min <- 2*sd
+            } else if(QRP_committed == 'remove_outliers_medium'){
+                cutoff_max <- 2*sd
+                cutoff_min <- 3*sd  
+            } else if(QRP_committed == 'remove_outliers_high'){
+                cutoff_max <- 2*sd
+                cutoff_min <- 3.5*sd
+            }
+            simulated_data <- simulated_data[simulated_data < mean + cutoff_max & simulated_data > mean - cutoff_min]
         }
     }
     
@@ -51,22 +68,17 @@ simulate_false_rejections <- function(num_simulations, n, mean, sd, QRP_committe
     
     # committing QRP(s) is handled here
     if (!is.null(QRP_committed)) {
-      if (QRP_committed == "round_p_values") {
+      if (QRP_committed == "round_p_values_low" || QRP_committed == "round_p_values_medium" || QRP_committed == "round_p_values_high") {
         # Round down p-values (e.g., p of .056 becomes p ≤ .05)
-        # chang all values between 0.05 and 0.058 to 0.049
-        p_values[i] <- ifelse(p_values[i] > 0.05 & p_values[i] < 0.058, 0.049, p_values[i])
-
-      } else if (QRP_committed == "multiple_dependent_variables") {
-        # Use multiple dependent variables and report only those giving desirable results (not implemented here)
-
-      } else if (QRP_committed == "specific_levels_reporting") {
-        # Report on specific levels (groups) of a nominal independent variable, depending on the results (not implemented here)
-
-      } else if (QRP_committed == "remove_covariates") {
-        # Remove covariates or add them to the model to get a lower p-value for the main independent variable (not implemented here)
-
+        # change all values between 0.05 and 0.058 to 0.049
+        if(QRP_committed == 'round_p_values_low'){
+            p_values[i] <- ifelse(p_values[i] > 0.05 & p_values[i] < 0.052, 0.049, p_values[i])
+        } else if(QRP_committed == 'round_p_values_medium'){
+            p_values[i] <- ifelse(p_values[i] > 0.05 & p_values[i] < 0.055, 0.049, p_values[i])
+        } else if(QRP_committed == 'round_p_values_high'){
+            p_values[i] <- ifelse(p_values[i] > 0.05 & p_values[i] < 0.06, 0.049, p_values[i])
+        }
       }
-      # Add more QRPs here if needed
     }
   }
   
@@ -104,7 +116,10 @@ get_results_df <- function() {
 
 
   #possible_QRPs <- c("correct_practices", "round_p_values", "sequential_testing", "remove_outliers", "multiple_dependent_variables", "specific_levels_reporting", "remove_covariates")
-    possible_QRPs <- c("correct_practices", "round_p_values", "sequential_testing", "remove_outliers")
+    possible_QRPs <- c("correct_practices",
+     "round_p_values_low", "round_p_values_medium", "round_p_values_high",
+     "sequential_testing_low", "sequential_testing_medium", "sequential_testing_high",
+     "remove_outliers_low", "remove_outliers_medium", "remove_outliers_high")
 
   for (QRP in possible_QRPs) {
     args = list(num_runs = 10,num_simulations = 30000, n = 100, mean = 65.5, sd = 7.7, QRP_committed = QRP)
