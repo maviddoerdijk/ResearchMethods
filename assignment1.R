@@ -114,7 +114,7 @@ get_results_df <- function() {
   # initialize empty df to store results
 
   # Set true to make results reproducible
-  set_seed <- FALSE
+  set_seed <- TRUE
   if (set_seed) {
     set.seed(123)
   }
@@ -128,7 +128,7 @@ get_results_df <- function() {
      "remove_outliers_low", "remove_outliers_medium", "remove_outliers_high")
 
   for (QRP in possible_QRPs) {
-    args = list(num_runs = 10,num_simulations = 30000, n = 1000, mean = 65.5, sd = 7.7, QRP_committed = QRP)
+    args = list(num_runs = 10,num_simulations = 30000, n = 10000, mean = 65.5, sd = 7.7, QRP_committed = QRP)
     results = do.call(simulate_average_false_rejections, args)
     print(paste("CI: ", results$ci))
     print(paste("SD: ", results$sd))
