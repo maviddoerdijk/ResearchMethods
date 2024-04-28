@@ -121,7 +121,7 @@ get_results_df <- function() {
   results_df <- data.frame(QRP = character(), mean = numeric(), CI = numeric(), SD = numeric(), stringsAsFactors = FALSE)
 
 
-  #possible_QRPs <- c("correct_practices", "round_p_values", "sequential_testing", "remove_outliers", "multiple_dependent_variables", "specific_levels_reporting", "remove_covariates")
+    # Define the QRPs to test
     possible_QRPs <- c("correct_practices",
      "round_p_values_low", "round_p_values_medium", "round_p_values_high",
      "sequential_testing_low", "sequential_testing_medium", "sequential_testing_high",
